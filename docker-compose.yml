@@ -1,44 +1,24 @@
 services:
   healthkart-app:
     build:
-      context: ./healthkart-java
+      context: .
       dockerfile: Dockerfile
     container_name: healthkart-server
     restart: unless-stopped
     ports:
-      - "3000:3000"   # Spring Boot Web Application & REST APIs
-      - "9092:9092"   # Netty-SocketIO Real-time WebSockets & Teleconsultation
+      - "3000:3000"
+      - "9092:9092"
     volumes:
-      - ./healthkart-java/data:/app/data
+      - ./data:/app/data
     environment:
       - PORT=3000
       - TZ=Asia/Kolkata
       - JAVA_OPTS=-Xms256m -Xmx512m
-      # Switch to 'mysql' if using the MySQL service below:
       - healthkart.db.type=sqlite
-      # - healthkart.db.mysql.url=jdbc:mysql://mysql:3306/healthkart_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
-      # - healthkart.db.mysql.username=root
-      # - healthkart.db.mysql.password=Priyanshu@12345
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/servlets/health"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 20s
-
-  # Optional MySQL 8.0 service (uncomment if you want a dedicated cloud MySQL container)
-  # mysql:
-  #   image: mysql:8.0
-  #   container_name: healthkart-mysql
-  #   restart: unless-stopped
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: Priyanshu@12345
-  #     MYSQL_DATABASE: healthkart_db
-  #   ports:
-  #     - "3306:3306"
-  #   volumes:
-  #     - mysql-data:/var/lib/mysql
-
-# volumes:
-#   mysql-data:
 
