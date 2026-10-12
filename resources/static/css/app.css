@@ -1,0 +1,216 @@
+.page{padding:40px 7%;min-height:70vh}
+.page h1{font-size:30px;margin-bottom:6px}
+.sub{color:#69766f;font-size:14px;margin-bottom:24px}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.toolbar input,.toolbar select,.field input,.field select,.field textarea{border:1px solid #dfe9e4;border-radius:9px;padding:11px 14px;font:inherit;font-size:14px;outline:none;background:#fff}
+.toolbar input{flex:1;min-width:200px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
+.card{border:1px solid #e5ebe8;border-radius:16px;padding:20px;background:#fff;transition:.2s}
+.card:hover{box-shadow:0 12px 30px rgba(20,70,50,.08)}
+.card .ico{width:48px;height:48px;border-radius:12px;background:#eaf9f3;color:#0b9f6e;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.card h3{font-size:16px;margin-bottom:4px}
+.card p{font-size:13px;color:#69766f;line-height:1.5}
+.tag{display:inline-block;background:#eaf9f3;color:#0b9f6e;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:8px}
+.price{font-size:20px;font-weight:800;margin:10px 0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{background:#0b9f6e;color:#fff;border:none;padding:10px 16px;border-radius:9px;font:inherit;font-weight:600;font-size:13px;cursor:pointer}
+.btn:hover{background:#098a5f}
+.btn.ghost{background:#fff;color:#0b9f6e;border:1px solid #b9dfd0}
+.btn.red{background:#e5484d}
+.btn.sm{padding:6px 11px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.empty{text-align:center;color:#77837d;padding:50px 0}
+.modal-bg{position:fixed;inset:0;background:rgba(10,30,22,.5);display:none;align-items:center;justify-content:center;z-index:3000;padding:16px}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:26px;max-width:520px;width:100%;max-height:90vh;overflow:auto}
+.modal h2{margin-bottom:14px;font-size:20px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;font-size:13px;font-weight:600;color:#53605a}
+.field input,.field select,.field textarea{width:100%}
+.slots{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.slot{border:1px solid #b9dfd0;background:#fff;color:#0b9f6e;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.slot.sel{background:#0b9f6e;color:#fff}
+.slot.booked{background:#f1f3f2;color:#a0aaa5;border-color:#e5ebe8;cursor:not-allowed;text-decoration:line-through}
+.err{color:#e5484d;font-size:13px;margin:6px 0}
+table.t{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid #e5ebe8;border-radius:12px;overflow:hidden}
+table.t th,table.t td{padding:12px 14px;border-bottom:1px solid #edf1ee;text-align:left;vertical-align:top}
+table.t th{background:#f7faf8;font-size:12px;color:#53605a}
+.best{color:#0b9f6e;font-weight:800}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;border-bottom:1px solid #edf1ee}
+.tab{padding:10px 16px;font-weight:600;font-size:14px;color:#69766f;cursor:pointer;border:none;background:none;border-bottom:3px solid transparent}
+.tab.on{color:#0b9f6e;border-color:#0b9f6e}
+.pane{display:none}.pane.on{display:block}
+.list{display:flex;flex-direction:column;gap:12px}
+.item{border:1px solid #e5ebe8;border-radius:12px;padding:16px;background:#fff;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.item small{color:#77837d}
+.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#eaf9f3;color:#0b9f6e}
+.badge.CANCELLED{background:#fdeceb;color:#e5484d}.badge.COMPLETED{background:#eef1f9;color:#4a62c9}
+.chat{border:1px solid #e5ebe8;border-radius:12px;height:380px;overflow:auto;padding:14px;background:#fafcfb;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:78%;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.55}
+.msg.me{align-self:flex-end;background:#0b9f6e;color:#fff}
+.msg.bot{align-self:flex-start;background:#fff;border:1px solid #e5ebe8}
+#toasts{position:fixed;right:18px;bottom:18px;z-index:4000;display:flex;flex-direction:column;gap:10px}
+.toast{background:#14231d;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.2);max-width:320px}
+.callbox{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.videos{position:relative;background:#14231d;border-radius:16px;overflow:hidden;min-height:420px}
+#remoteVideo{width:100%;height:100%;min-height:420px;object-fit:cover;background:#14231d}
+#localVideo{position:absolute;right:14px;bottom:14px;width:160px;border-radius:10px;border:2px solid #fff;background:#000}
+.cstatus{position:absolute;left:14px;top:14px;color:#fff;background:rgba(0,0,0,.45);padding:6px 12px;border-radius:20px;font-size:12px}
+@media(max-width:900px){.callbox{grid-template-columns:1fr}.navbar nav{display:none}}
+
+/* Real Doctor & Medicine Image Presentation */
+.doctor-card {
+  position: relative;
+  overflow: hidden;
+}
+.doctor-media {
+  position: relative;
+  width: 100%;
+  height: 190px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  background: #f1f5f3;
+}
+.doctor-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 0.3s ease;
+}
+.doctor-card:hover .doctor-media img {
+  transform: scale(1.04);
+}
+.doctor-media .media-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eaf9f3;
+  color: #0b9f6e;
+  font-size: 42px;
+}
+.medicine-media {
+  position: relative;
+  width: 100%;
+  height: 165px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  background: #f8fafc;
+}
+.medicine-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+.card:hover .medicine-media img {
+  transform: scale(1.04);
+}
+.medicine-media .media-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eaf9f3;
+  color: #0b9f6e;
+  font-size: 38px;
+}
+.card-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.avatar-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #0b9f6e;
+  box-shadow: 0 2px 6px rgba(11,159,110,0.25);
+}
+.compare-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-bottom: 6px;
+  border: 1px solid #dfe9e4;
+}
+
+/* ---- Enhanced Image Styling ---- */
+.doctor-media img[src=""], .medicine-media img[src=""],
+.doctor-media img:not([src]), .medicine-media img:not([src]) {
+  display: none !important;
+}
+
+.doctor-media img[src=""] + .media-fallback,
+.medicine-media img[src=""] + .media-fallback,
+.doctor-media img:not([src]) + .media-fallback,
+.medicine-media img:not([src]) + .media-fallback {
+  display: flex !important;
+}
+
+/* Better card shadows and transitions */
+.card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(20,70,50,0.1);
+}
+
+/* Avatar improvements */
+.avatar-thumb {
+  transition: transform 0.2s ease;
+}
+
+.avatar-thumb:hover {
+  transform: scale(1.08);
+}
+
+/* Image loading placeholder animation */
+@keyframes imgShimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.medicine-media, .doctor-media {
+  background: linear-gradient(90deg, #f1f5f3 25%, #e8f0ec 50%, #f1f5f3 75%);
+  background-size: 200px 100%;
+  animation: imgShimmer 1.5s infinite;
+}
+
+.medicine-media img, .doctor-media img {
+  position: relative;
+  z-index: 1;
+}
+
+/* Compare page image styling */
+.compare-thumb {
+  transition: transform 0.2s ease;
+}
+
+.compare-thumb:hover {
+  transform: scale(1.05);
+}
+
+/* Badge improvements */
+.badge {
+  transition: background 0.2s;
+}
+
+.tag {
+  transition: background 0.2s, color 0.2s;
+}
+
+.card:hover .tag {
+  background: #0b9f6e;
+  color: white;
+}
