@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthKart - System Architecture &amp; Database Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/app.css">
+    <style>
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .feature-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+            border-color: #0b9f6e;
+        }
+        .feature-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .feature-badge {
+            background: #eaf9f3;
+            color: #0b9f6e;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .code-pill {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 11px;
+            font-family: monospace;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px 2px 2px 0;
+        }
+        .status-box {
+            background: #0f172a;
+            color: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+        }
+        .console-log {
+            background: #020617;
+            color: #38bdf8;
+            padding: 14px;
+            border-radius: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 12px;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav"></div>
+
+    <main class="page">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:8px;">
+            <div>
+                <h1>System Architecture &amp; Database Console</h1>
+                <p class="sub">Live monitor for JDBC database connectivity, relational tables, and multithreaded concurrency</p>
+            </div>
+            <button class="btn" id="refreshBtn" onclick="loadStatus()">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh JDBC Status
+            </button>
+        </div>
+
+        <!-- System Architecture Components Grid -->
+        <h2 style="font-size: 18px; margin-bottom: 14px; color: #1e293b;">
+            <i class="fa-solid fa-cubes"></i> Core System Architecture Components
+        </h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-header">
+                    <h3 style="font-size: 15px; margin: 0;">OOP Implementation</h3>
+                    <span class="feature-badge">Domain Model</span>
+                </div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                    Inheritance, Polymorphism, Custom Exception Handling, Interfaces.
+                </p>
+                <div>
+                    <span class="code-pill">BaseEntity</span>
+                    <span class="code-pill">Person &rarr; Doctor, Patient, User</span>
+                    <span class="code-pill">AbstractJdbcDao</span>
+                    <span class="code-pill">HealthKartException</span>
+                    <span class="code-pill">CrudDao&lt;T, ID&gt;</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-header">
+                    <h3 style="font-size: 15px; margin: 0;">Collections &amp; Generics</h3>
+                    <span class="feature-badge">Data Processing</span>
+                </div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                    Type-safe Generics, Lists, Sets, Maps, and PriorityQueue Triage.
+                </p>
+                <div>
+                    <span class="code-pill">DataResult&lt;T&gt;</span>
+                    <span class="code-pill">CrudDao&lt;T, ID&gt;</span>
+                    <span class="code-pill">PriorityQueue&lt;Appointment&gt;</span>
+                    <span class="code-pill">TreeSet&lt;String&gt;</span>
+                    <span class="code-pill">Map&lt;Medicine, Integer&gt;</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-header">
+                    <h3 style="font-size: 15px; margin: 0;">Multithreading &amp; Sync</h3>
+                    <span class="feature-badge">Concurrency</span>
+                </div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                    Double-booking prevention lock, background daemon workers.
+                </p>
+                <div>
+                    <span class="code-pill">ReentrantLock</span>
+                    <span class="code-pill">ACID Transactions</span>
+                    <span class="code-pill">BackgroundReminderWorker</span>
+                    <span class="code-pill">5-Thread Race Test</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-header">
+                    <h3 style="font-size: 15px; margin: 0;">Database Operations</h3>
+                    <span class="feature-badge">DAO Pattern</span>
+                </div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                    Data Access Object (DAO) architecture with pure JDBC CRUD operations.
+                </p>
+                <div>
+                    <span class="code-pill">UserDaoImpl</span>
+                    <span class="code-pill">DoctorDaoImpl</span>
+                    <span class="code-pill">MedicineDaoImpl</span>
+                    <span class="code-pill">AppointmentDaoImpl</span>
+                    <span class="code-pill">PrescriptionDaoImpl</span>
+                    <span class="code-pill">ReminderDaoImpl</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-header">
+                    <h3 style="font-size: 15px; margin: 0;">JDBC Connectivity</h3>
+                    <span class="feature-badge">Persistence</span>
+                </div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                    Pure JDBC Connection, PreparedStatement, ResultSet, Transactions.
+                </p>
+                <div>
+                    <span class="code-pill">DatabaseConnectionManager</span>
+                    <span class="code-pill">java.sql.Connection</span>
+                    <span class="code-pill">java.sql.PreparedStatement</span>
+                    <span class="code-pill">SQLite data/healthkart.db</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-header">
+                    <h3 style="font-size: 15px; margin: 0;">Servlets &amp; Web Integration</h3>
+                    <span class="feature-badge">Web Architecture</span>
+                </div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                    Standard Jakarta HttpServlets, Servlet Filters &amp; Spring MVC REST controllers.
+                </p>
+                <div>
+                    <span class="code-pill">AuthServlet (/servlets/auth)</span>
+                    <span class="code-pill">AppointmentServlet</span>
+                    <span class="code-pill">MedicineCatalogServlet</span>
+                    <span class="code-pill">SecurityAndLoggingFilter</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live JDBC Connection Status -->
+        <div class="status-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+                <span style="font-size: 15px; font-weight: bold; color: #38bdf8;">
+                    <i class="fa-solid fa-database"></i> Live JDBC Connection Status
+                </span>
+                <span id="connBadge" style="background:#16a34a; color:#fff; padding:3px 10px; border-radius:12px; font-size:12px;">
+                    CONNECTED
+                </span>
+            </div>
+            <div id="connDetails" style="line-height: 1.8; color: #cbd5e1;">
+                Loading JDBC Connection parameters...
+            </div>
+        </div>
+
+        <!-- Concurrency Race Test -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                <div>
+                    <h3 style="margin:0;"><i class="fa-solid fa-bolt" style="color:#eab308"></i> Live Multithreading Concurrency Test</h3>
+                    <p style="font-size:13px; color:#64748b; margin:4px 0 0 0;">
+                        Spawns 5 simultaneous Java threads attempting to book the identical slot at the exact same millisecond.
+                    </p>
+                </div>
+                <button class="btn" id="runTestBtn" onclick="runConcurrencyTest()" style="background:#eab308; color:#0f172a;">
+                    <i class="fa-solid fa-play"></i> Run 5-Thread Concurrency Test
+                </button>
+            </div>
+            <div id="testResult" style="display:none;">
+                <div id="testSummary" style="font-weight:bold; font-size:14px; margin-bottom:8px;"></div>
+                <div class="console-log" id="testLog"></div>
+            </div>
+        </div>
+
+        <!-- Relational Tables Browser -->
+        <h2 style="font-size: 18px; margin-bottom: 14px; color: #1e293b;">
+            <i class="fa-solid fa-table"></i> Database Tables &amp; Record Counts (JDBC)
+        </h2>
+        <div style="overflow-x:auto;">
+            <table class="t" id="tablesTable">
+                <thead>
+                    <tr>
+                        <th>Table Name</th>
+                        <th>Record Count</th>
+                        <th>Associated Java DAO Class</th>
+                        <th>Primary Key</th>
+                    </tr>
+                </thead>
+                <tbody id="tablesBody">
+                    <tr><td colspan="4" style="text-align:center;">Loading database tables...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="../js/common.js"></script>
+    <script>
+        HK.nav("database");
+
+        async function loadStatus() {
+            try {
+                const r = await HK.api('/jdbc/status');
+                if (r.success) {
+                    document.getElementById('connBadge').textContent = r.connected ? 'CONNECTED (Active)' : 'DISCONNECTED';
+                    document.getElementById('connBadge').style.background = r.connected ? '#16a34a' : '#dc2626';
+
+                    document.getElementById('connDetails').innerHTML = `
+                        <b>Database Engine:</b> ${HK.esc(r.dbProduct)}<br>
+                        <b>JDBC Driver:</b> ${HK.esc(r.driver)}<br>
+                        <b>JDBC URL:</b> ${HK.esc(r.jdbcUrl)}<br>
+                        <b>Ping Latency:</b> ${r.latencyMs} ms
+                    `;
+
+                    const tbody = document.getElementById('tablesBody');
+                    tbody.innerHTML = r.tables.map(t => `
+                        <tr>
+                            <td><b><i class="fa-solid fa-table-cells"></i> ${HK.esc(t.table)}</b></td>
+                            <td><span style="font-weight:700; color:#0b9f6e;">${t.count} records</span></td>
+                            <td><code>${HK.esc(t.daoClass)}</code></td>
+                            <td><code>${t.table === 'appointments' ? 'appointment_id' : t.table === 'booked_slots' ? 'slot_key' : t.table === 'orders' ? 'order_id' : 'id'}</code></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                document.getElementById('connDetails').innerHTML = `<span style="color:#ef4444;">Error connecting to JDBC: ${HK.esc(e.message)}</span>`;
+            }
+        }
+
+        async function runConcurrencyTest() {
+            const btn = document.getElementById('runTestBtn');
+            const resultBox = document.getElementById('testResult');
+            const summaryBox = document.getElementById('testSummary');
+            const logBox = document.getElementById('testLog');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running 5 Threads...';
+            resultBox.style.display = 'block';
+            summaryBox.textContent = 'Spawning 5 Java threads and synchronizing execution...';
+            logBox.textContent = 'Waiting for thread results...';
+
+            try {
+                const res = await HK.api('/jdbc/concurrency-test', { method: 'POST' });
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> Run 5-Thread Concurrency Test';
+
+                if (res.passed) {
+                    summaryBox.innerHTML = `<span style="color:#16a34a;">✔ ${res.conclusion}</span> (1 Successful, ${res.preventedConflicts} Conflicts Safely Rejected)`;
+                } else {
+                    summaryBox.innerHTML = `<span style="color:#dc2626;">✖ ${res.conclusion}</span>`;
+                }
+
+                logBox.textContent = res.logs.join('\n');
+                loadStatus(); // refresh table counts
+            } catch (e) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> Run 5-Thread Concurrency Test';
+                summaryBox.innerHTML = `<span style="color:#dc2626;">Error: ${HK.esc(e.message)}</span>`;
+            }
+        }
+
+        loadStatus();
+    </script>
+</body>
+</html>

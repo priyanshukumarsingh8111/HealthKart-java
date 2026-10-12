@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthKart - My Health</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../css/app.css">
+</head><body>
+<div id="nav"></div>
+<main class="page"><h1>My Health</h1><p class="sub" id="who"></p>
+<div class="tabs" id="tabs">
+<button class="tab on" data-p="appts">Appointments</button><button class="tab" data-p="rx">Prescriptions</button>
+<button class="tab" data-p="rem">Reminders</button><button class="tab" data-p="notif">Notifications</button>
+<button class="tab" data-p="ai">AI Assistant</button><button class="tab" data-p="triage">Symptom Triage</button><button class="tab" data-p="rec">Health Records</button></div>
+
+<section class="pane on" id="appts"><div class="list" id="apptList"></div></section>
+<section class="pane" id="rx"><div class="list" id="rxList"></div></section>
+<section class="pane" id="rem">
+ <div class="card" style="margin-bottom:18px"><div class="row">
+  <select id="rt"><option value="medicine">Medicine</option><option value="yoga">Yoga</option></select>
+  <input id="rn" placeholder="Name (e.g. Paracetamol)" style="flex:1;min-width:160px;border:1px solid #dfe9e4;border-radius:9px;padding:10px">
+  <input id="rtime" type="time" value="13:00" style="border:1px solid #dfe9e4;border-radius:9px;padding:10px">
+  <button class="btn" id="radd">Add reminder</button></div></div>
+ <div class="list" id="remList"></div></section>
+<section class="pane" id="notif"><div class="row" style="margin-bottom:14px"><button class="btn sm ghost" id="mark">Mark all as read</button></div><div class="list" id="nList"></div></section>
+<section class="pane" id="ai"><div class="chat" id="chat"></div>
+ <div class="row" style="margin-top:12px"><input id="ci" placeholder='Try: "Remind me to take Paracetamol after lunch at 1:30 PM"' style="flex:1;border:1px solid #dfe9e4;border-radius:9px;padding:12px"><button class="btn" id="cs">Send</button></div>
+ <p class="sub" style="margin-top:10px">Rule-based assistant. General information only, not medical advice.</p></section>
+<section class="pane" id="triage"><div class="field">Describe your symptoms<textarea id="sym" rows="3" placeholder="e.g. itchy skin rash on my arms for 3 days"></textarea></div>
+ <button class="btn" id="tg">Analyze</button><div id="tgOut" style="margin-top:18px"></div></section>
+<section class="pane" id="rec"><div class="card" style="margin-bottom:18px"><div class="row"><input id="rcT" placeholder="Title (e.g. Blood test)" style="border:1px solid #dfe9e4;border-radius:9px;padding:10px">
+ <input id="rcN" placeholder="Notes / value" style="flex:1;border:1px solid #dfe9e4;border-radius:9px;padding:10px"><button class="btn" id="rcA">Save record</button></div></div><div class="list" id="rcL"></div></section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"></script>
+<script src="../js/common.js"></script>
+<script>
+HK.nav("health");
+
+const $=id=>document.getElementById(id),u=HK.user();
+if(!u){document.querySelector('main').innerHTML=`<div class="empty">Please <a href="${HK.pageUrl('login.html')}" style="color:#0b9f6e;font-weight:700">log in</a> to see your health dashboard.</div>`;}
+else{
+$('who').textContent='Signed in as '+u.name+' ('+u.email+')';
+$('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;document.querySelectorAll('.tab,.pane').forEach(x=>x.classList.remove('on'));b.classList.add('on');$(b.dataset.p).classList.add('on');};
+const em=encodeURIComponent(u.email),empty=t=>`<div class="empty">${t}</div>`;
+
+async function appts(){
+  try {
+    const r=await HK.api('/appointments/my?email='+em);
+    const list=r.appointments||[];
+    $('apptList').innerHTML=list.length?list.map(a=>`<div class="item"><div style="display:flex;gap:12px;align-items:center;">
+    ${a.doctorImage?`<img class="avatar-thumb" src="${HK.img?HK.img(a.doctorImage):a.doctorImage}" alt="${HK.esc(a.doctorName)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"><div class="ico" style="margin:0;display:none;"><i class="fa-solid fa-user-doctor"></i></div>`:`<div class="ico" style="margin:0;"><i class="fa-solid fa-user-doctor"></i></div>`}
+    <div><b>${HK.esc(a.doctorName)}</b> <span class="badge ${a.status}">${a.status}</span><br>
+    <small>${HK.esc(a.specialization)} · ${HK.esc(a.appointmentDate)} at ${HK.esc(a.appointmentTime)} · ${HK.esc(a.consultationType)}</small><br><small>ID: ${a.appointmentId}</small></div></div>
+    <div class="row">${a.status==='CONFIRMED'?`<a class="btn sm" href="${HK.pageUrl('call.html')}?appointment=${a.appointmentId}&role=patient">Join call</a><button class="btn sm red" data-c="${a.appointmentId}">Cancel</button>`:''}</div></div>`).join(''):empty('No appointments yet.');
+    $('apptList').querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{if(!confirm('Cancel this appointment?'))return;try{await HK.api(`/appointments/${b.dataset.c}/cancel`,{method:'POST',body:{}});appts();}catch(e){HK.toast(e.message);}});
+  } catch(e) { $('apptList').innerHTML=empty('No appointments yet.'); }
+}
+async function rx(){
+  try {
+    const r=await HK.api('/prescriptions?email='+em);
+    const list=r.prescriptions||[];
+    $('rxList').innerHTML=list.length?list.map(p=>`<div class="item" style="display:block"><b>${p.id}</b> · ${HK.esc(p.doctorName)} <small>${new Date(p.createdAt).toLocaleDateString()}</small>
+    <p style="margin:8px 0"><b>Diagnosis:</b> ${HK.esc(p.diagnosis)}</p>
+    ${(p.medicines||[]).map(m=>`<p>💊 ${HK.esc(m.name)} (${HK.esc(m.dosage||'')}) - ${HK.esc(m.mealTiming||'')}</p>`).join('')}
+    ${(p.yogaRoutines||[]).map(y=>`<p>🧘 ${HK.esc(y.poseName||y.name||'')} - ${HK.esc(y.duration||'')}</p>`).join('')}
+    <p style="margin-top:8px"><b>Advice:</b> ${HK.esc(p.advice)}</p></div>`).join(''):empty('No prescriptions yet.');
+  } catch(e) { $('rxList').innerHTML=empty('No prescriptions yet.'); }
+}
+async function rem(){
+  try {
+    const r=await HK.api('/reminders?email='+em);
+    window._rem=r.reminders||[];
+    $('remList').innerHTML=window._rem.length?window._rem.map(x=>`<div class="item"><div><b>${x.type==='yoga'?'🧘 '+HK.esc(x.yogaName):'💊 '+HK.esc(x.medicineName)}</b> <span class="badge">${HK.esc(x.status)}</span><br>
+    <small>⏰ ${HK.esc(x.reminderTime)} · ${HK.esc(x.frequency)} ${x.mealTiming?'· '+HK.esc(x.mealTiming):''}</small><br><small>${HK.esc(x.instructions||'')}</small></div>
+    <div class="row"><button class="btn sm ghost" data-t="${x.id}" data-s="${x.status}">${x.status==='ACTIVE'?'Pause':'Resume'}</button><button class="btn sm red" data-x="${x.id}">Delete</button></div></div>`).join(''):empty('No reminders.');
+    $('remList').querySelectorAll('[data-x]').forEach(b=>b.onclick=async()=>{await HK.api('/reminders/'+b.dataset.x,{method:'DELETE'});rem();});
+    $('remList').querySelectorAll('[data-t]').forEach(b=>b.onclick=async()=>{await HK.api('/reminders/'+b.dataset.t,{method:'PUT',body:{status:b.dataset.s==='ACTIVE'?'PAUSED':'ACTIVE'}});rem();});
+  } catch(e) { $('remList').innerHTML=empty('No reminders.'); }
+}
+$('radd').onclick=async()=>{const t=$('rt').value,n=$('rn').value.trim();if(!n)return HK.toast('Enter a name');
+ await HK.api('/reminders',{method:'POST',body:{type:t,[t==='yoga'?'yogaName':'medicineName']:n,reminderTime:$('rtime').value,userEmail:u.email}});$('rn').value='';rem();};
+async function notif(){
+  try {
+    const r=await HK.api('/notifications?email='+em);
+    const list=r.notifications||[];
+    $('nList').innerHTML=list.length?list.map(n=>`<div class="item" style="${n.read?'opacity:.6':''}"><div><b>${HK.esc(n.title)}</b><br><small>${HK.esc(n.message)}</small></div><small>${new Date(n.createdAt).toLocaleString()}</small></div>`).join(''):empty('No notifications.');
+  } catch(e) { $('nList').innerHTML=empty('No notifications.'); }
+}
+$('mark').onclick=async()=>{await HK.api('/notifications/mark-read',{method:'POST',body:{}});notif();};
+
+// AI chat
+const chat=$('chat');const add=(c,t)=>{chat.insertAdjacentHTML('beforeend',`<div class="msg ${c}">${HK.md(t)}</div>`);chat.scrollTop=chat.scrollHeight;};
+add('bot','Hello! Ask me about your prescriptions, medicine timings, yoga, or tell me to set a reminder.');
+async function send(){const t=$('ci').value.trim();if(!t)return;$('ci').value='';add('me',t);
+ try{const r=await HK.api('/ai/chat',{method:'POST',body:{message:t,userEmail:u.email}});add('bot',r.reply);if(r.actionTaken)rem();}catch(e){add('bot','Sorry: '+e.message);}}
+$('cs').onclick=send;$('ci').onkeydown=e=>{if(e.key==='Enter')send();};
+
+// triage
+$('tg').onclick=async()=>{const s=$('sym').value.trim();if(!s)return;
+ try{const r=await HK.api('/ai/triage',{method:'POST',body:{symptoms:s}});const d=r.recommendedDoctor;
+ $('tgOut').innerHTML=`<div class="card"><span class="tag">${HK.esc(r.specialty)}</span><h3>${HK.esc(r.urgency)}</h3><p style="margin:8px 0">${HK.esc(r.clinicalSummary)}</p>
+  <b>Questions to ask:</b><ul style="margin:6px 0 10px 20px;font-size:13px">${r.suggestedQuestions.map(q=>`<li>${HK.esc(q)}</li>`).join('')}</ul>
+  <p><b>Yoga note:</b> ${HK.esc(r.yogaPrecaution)}</p>${d?`<a class="btn" style="display:inline-block;margin-top:12px" href="${HK.pageUrl('doctors.html')}?doctor=${d.id}">Book ${HK.esc(d.name)}</a>`:''}</div>`;}catch(e){HK.toast(e.message);}};
+
+// local health records
+function rec(){const l=HK.json('hk_records',[]);$('rcL').innerHTML=l.length?l.map((x,i)=>`<div class="item"><div><b>${HK.esc(x.t)}</b><br><small>${HK.esc(x.n)} · ${new Date(x.d).toLocaleDateString()}</small></div><button class="btn sm red" data-i="${i}">Delete</button></div>`).join(''):empty('No records saved.');
+ $('rcL').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{l.splice(+b.dataset.i,1);HK.save('hk_records',l);rec();});}
+$('rcA').onclick=()=>{const t=$('rcT').value.trim();if(!t)return;const l=HK.json('hk_records',[]);l.unshift({t,n:$('rcN').value.trim(),d:Date.now()});HK.save('hk_records',l);$('rcT').value=$('rcN').value='';rec();};
+
+// reminder alarm: check every 20s, fire once per reminder per minute
+const fired=new Set();
+setInterval(()=>{const n=new Date(),hm=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+ (window._rem||[]).filter(x=>x.status==='ACTIVE'&&x.reminderTime===hm).forEach(x=>{const k=x.id+hm+n.toDateString();if(fired.has(k))return;fired.add(k);
+  const msg=x.type==='yoga'?`Time for ${x.yogaName}`:`Time to take ${x.medicineName} (${x.mealTiming||''})`;HK.toast('⏰ '+msg);
+  try{speechSynthesis.speak(new SpeechSynthesisUtterance(msg));}catch(e){}});},20000);
+
+if(HK.socket){HK.socket.on('reminders_updated',()=>rem());HK.socket.on('realtime_notification',()=>{notif();appts();});HK.socket.on('new_prescription',()=>rx());}
+appts();rx();rem();notif();rec();}
+</script></body></html>

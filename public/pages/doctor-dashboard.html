@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthKart - Doctor Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../css/app.css">
+</head><body>
+<div id="nav"></div>
+<main class="page"><h1>Doctor Dashboard</h1><p class="sub" id="who"></p>
+<div class="toolbar"><select id="docSel"></select><button class="btn ghost" id="rf">Refresh</button></div>
+<h2 style="margin-bottom:12px">Appointments</h2><div class="list" id="list"></div></main>
+<div class="modal-bg" id="bg"><div class="modal"><h2>Issue prescription</h2><p class="sub" id="pfor"></p>
+<div class="field">Diagnosis<input id="dg"></div>
+<div class="field">Medicine name<input id="mn"></div>
+<div class="row"><div class="field" style="flex:1">Dosage<input id="md" placeholder="500mg"></div>
+<div class="field" style="flex:1">Meal timing<select id="mt"><option>After Breakfast</option><option selected>After Lunch</option><option>After Dinner</option><option>Before Breakfast</option><option>Before Lunch</option><option>Before Dinner</option><option>Empty Stomach</option></select></div></div>
+<div class="field">Yoga routine (optional)<input id="yn" placeholder="Anulom Vilom Pranayama"></div>
+<div class="field">Advice<textarea id="ad" rows="2"></textarea></div><div class="err" id="err"></div>
+<div class="row"><button class="btn" id="sv">Issue prescription</button><button class="btn ghost" id="cl">Close</button></div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"></script>
+<script src="../js/common.js"></script>
+<script>
+HK.nav("dash");
+
+const $=id=>document.getElementById(id),u=HK.user();let cur=null;
+if(!u||u.role!=='doctor'){document.querySelector('main').innerHTML=`<div class="empty">Doctor access only. <a href="${HK.pageUrl('login.html')}" style="color:#0b9f6e;font-weight:700">Log in as a doctor</a></div>`;}
+else{
+let docs=[];
+HK.api('/doctors').then(r=>{docs=r.doctors;$('docSel').innerHTML=docs.map(d=>`<option value="${d.id}" ${d.id===u.doctorId?'selected':''}>${HK.esc(d.name)}</option>`).join('');updateWho();load();});
+function updateWho(){const curD=docs.find(d=>d.id===$('docSel').value)||docs[0];if(curD){$('who').innerHTML=`<div class="card-avatar-row" style="margin-bottom:6px;">${curD.image?`<img class="avatar-thumb" src="${HK.img?HK.img(curD.image):curD.image}" alt="${HK.esc(curD.name)}" onerror="this.style.display='none';">`:''}<div><b>${HK.esc(curD.name)}</b><br><small style="color:#69766f">${HK.esc(curD.specialization)} · ${HK.esc(curD.clinicHospital)}</small></div></div>`;}}
+async function load(){const id=$('docSel').value;if(!id)return;updateWho();const r=await HK.api('/appointments/doctor/'+id);
+ const tdy=new Set(r.today.map(a=>a.appointmentId));
+ $('list').innerHTML=r.all.length?r.all.map(a=>`<div class="item"><div><b>${HK.esc(a.patientName)}</b> <span class="badge ${a.status}">${a.status}</span> ${tdy.has(a.appointmentId)?'<span class="badge">TODAY</span>':''}<br>
+  <small>${HK.esc(a.appointmentDate)} at ${HK.esc(a.appointmentTime)} · ${HK.esc(a.consultationType)} · ${HK.esc(a.patientMobile)}</small><br><small>Concern: ${HK.esc(a.healthConcern)}</small></div>
+  <div class="row">${a.status==='CONFIRMED'?`<button class="btn sm" data-call="${a.appointmentId}">Start call</button><button class="btn sm ghost" data-rx="${a.appointmentId}">Prescribe</button><button class="btn sm ghost" data-done="${a.appointmentId}">Complete</button>`:''}</div></div>`).join(''):'<div class="empty">No appointments.</div>';
+ const find=i=>r.all.find(a=>a.appointmentId===i);
+ $('list').querySelectorAll('[data-call]').forEach(b=>b.onclick=()=>{const a=find(b.dataset.call);
+  HK.socket&&HK.socket.emit('start_doctor_call',{roomId:a.callRoomId,appointmentId:a.appointmentId,doctorName:a.doctorName,patientName:a.patientName,patientEmail:a.patientEmail});
+  location.href=HK.pageUrl('call.html')+`?appointment=${a.appointmentId}&role=doctor`;});
+ $('list').querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{await HK.api(`/appointments/${b.dataset.done}/complete`,{method:'POST',body:{}});load();});
+ $('list').querySelectorAll('[data-rx]').forEach(b=>b.onclick=()=>{cur=find(b.dataset.rx);$('pfor').textContent='For '+cur.patientName+' ('+cur.appointmentId+')';$('err').textContent='';$('bg').classList.add('open');});}
+$('docSel').onchange=()=>{updateWho();load();};$('rf').onclick=load;$('cl').onclick=()=>$('bg').classList.remove('open');
+$('sv').onclick=async()=>{const dg=$('dg').value.trim();if(!dg)return $('err').textContent='Diagnosis is required.';
+ const body={appointmentId:cur.appointmentId,doctorId:cur.doctorId,doctorName:cur.doctorName,doctorSpecialization:cur.specialization,doctorHospital:cur.clinicHospital||'Max Super Speciality Hospital, New Delhi',
+  patientName:cur.patientName,patientEmail:cur.patientEmail,patientMobile:cur.patientMobile||cur.patientPhone,diagnosis:dg,advice:$('ad').value.trim(),medicines:[],yogaRoutines:[]};
+ if($('mn').value.trim())body.medicines.push({name:$('mn').value.trim(),dosage:$('md').value.trim(),mealTiming:$('mt').value});
+ if($('yn').value.trim())body.yogaRoutines.push({poseName:$('yn').value.trim(),duration:'15 Mins',timing:'07:00'});
+ try{const r=await HK.api('/prescriptions',{method:'POST',body});$('bg').classList.remove('open');HK.toast('Prescription issued. '+r.remindersCount+' reminders scheduled.');}catch(e){$('err').textContent=e.message;}};
+if(HK.socket)HK.socket.on('realtime_notification',load);
+}
+</script></body></html>

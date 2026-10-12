@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthKart - Doctors</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../css/app.css">
+</head><body>
+<div id="nav"></div>
+<main class="page"><h1>Find a Doctor</h1><p class="sub">Book a slot for a video consultation. Sundays are closed.</p>
+<div class="toolbar"><input id="q" placeholder="Search by name or specialty..."></div><div id="out" class="grid"></div></main>
+<div class="modal-bg" id="bg"><div class="modal"><h2 id="mt">Book appointment</h2>
+<div class="field">Date<input type="date" id="date"></div>
+<div class="field">Time slot</div><div class="slots" id="slots"></div>
+<div class="field">Your name<input id="pn"></div><div class="field">Mobile<input id="pm" inputmode="numeric"></div>
+<div class="field">Email<input id="pe" type="email"></div>
+<div class="field">Consultation type<select id="ct"><option>Video Consultation</option><option>Clinic Visit</option></select></div>
+<div class="field">Health concern<textarea id="hc" rows="2"></textarea></div>
+<div class="err" id="err"></div><div class="row"><button class="btn" id="bk">Confirm booking</button><button class="btn ghost" id="cl">Close</button></div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"></script>
+<script src="../js/common.js"></script>
+<script>
+HK.nav("doctors");
+
+let docs=[],cur=null,sel=null;const $=id=>document.getElementById(id);
+const out=$('out'),bg=$('bg');
+function draw(){const q=$('q').value.toLowerCase();
+ const l=docs.filter(d=>(d.name+d.specialization).toLowerCase().includes(q));
+ out.innerHTML=l.length?l.map(d=>`<div class="card doctor-card">
+  <div class="doctor-media">
+    ${d.image?`<img src="${HK.img?HK.img(d.image):d.image}" alt="${HK.esc(d.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">`:''}
+    <div class="media-fallback" style="${d.image?'display:none;':''}"><i class="fa-solid fa-user-doctor"></i></div>
+  </div>
+  <span class="tag">${HK.esc(d.specialization)}</span>
+  <h3>${HK.esc(d.name)}</h3><p>${HK.esc(d.clinicHospital)}<br>${d.experience?d.experience+' yrs experience · ':''}<span style="color:#eab308;font-weight:700;">★</span> ${d.rating||'-'}</p>
+  <div class="price">${HK.rupee(d.consultationFee)}</div><button class="btn" style="width:100%" data-b="${d.id}">Book appointment</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No doctors found.</div>';
+ out.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>open(docs.find(d=>d.id===b.dataset.b)));}
+async function slots(){sel=null;$('err').textContent='';const d=$('date').value;if(!d){$('slots').innerHTML='';return;}
+ try{const r=await HK.api(`/appointments/slots?doctorId=${cur.id}&date=${d}`);
+  $('slots').innerHTML=r.slots.map(s=>`<button class="slot ${s.isBooked?'booked':''}" ${s.isBooked?'disabled':''} data-t="${HK.esc(s.time)}">${HK.esc(s.time)}</button>`).join('')||'No slots';
+  $('slots').querySelectorAll('.slot:not(.booked)').forEach(b=>b.onclick=()=>{sel=b.dataset.t;$('slots').querySelectorAll('.slot').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');});
+ }catch(e){$('slots').innerHTML='';$('err').textContent=e.message;}}
+function open(d){cur=d;const u=HK.user()||{};
+ $('mt').innerHTML=`<div class="card-avatar-row">${d.image?`<img class="avatar-thumb" src="${HK.img?HK.img(d.image):d.image}" alt="${HK.esc(d.name)}" onerror="this.style.display='none';">`:''}<div>Book with ${HK.esc(d.name)}<br><small style="color:#69766f;font-weight:normal;font-size:12px;">${HK.esc(d.specialization)} · ${HK.rupee(d.consultationFee)}</small></div></div>`;
+ $('pn').value=u.role==='patient'?u.name:'';$('pe').value=u.role==='patient'?u.email:'';
+ const t=new Date();$('date').min=t.toISOString().slice(0,10);$('date').value='';$('slots').innerHTML='';$('err').textContent='';bg.classList.add('open');}
+$('date').onchange=slots;$('cl').onclick=()=>bg.classList.remove('open');$('q').oninput=draw;
+$('bk').onclick=async()=>{ $('err').textContent='';
+ if(!sel)return $('err').textContent='Please choose a time slot.';
+ try{const r=await HK.api('/appointments/book',{method:'POST',body:{doctorId:cur.id,appointmentDate:$('date').value,appointmentTime:sel,
+   patientName:$('pn').value.trim(),patientMobile:$('pm').value.trim(),patientEmail:$('pe').value.trim(),healthConcern:$('hc').value.trim(),consultationType:$('ct').value}});
+  bg.classList.remove('open');HK.toast('Booked! ID '+r.appointment.appointmentId);}
+ catch(e){$('err').textContent=e.message;if(e.data&&e.data.isSlotTaken)slots();}};
+if(HK.socket){const r=()=>{if(bg.classList.contains('open')&&cur)slots();};HK.socket.on('slot_booked',r);HK.socket.on('slot_freed',r);}
+HK.api('/doctors').then(r=>{docs=r.doctors || [];draw();const w=new URLSearchParams(location.search).get('doctor');if(w){const d=docs.find(x=>x.id===w);if(d)open(d);}}).catch(()=>{docs=[];draw();});
+</script></body></html>

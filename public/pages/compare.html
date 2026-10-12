@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthKart - Compare</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../css/app.css">
+</head><body>
+<div id="nav"></div>
+<main class="page"><h1>Compare Prices</h1><p class="sub">Compare up to 3 products and see the cheapest provider.</p>
+<div class="toolbar"><select id="pick"><option value="">+ Add a product to compare</option></select><button class="btn ghost" id="clear">Clear all</button></div>
+<div id="out"></div></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"></script>
+<script src="../js/common.js"></script>
+<script>
+HK.nav("compare");
+
+const pick=document.getElementById('pick'),out=document.getElementById('out');let all=[];
+async function render(){
+  const ids=HK.json('hk_compare',[]);const items=ids.map(i=>all.find(m=>m.id===i)).filter(Boolean);
+  if(!items.length){out.innerHTML='<div class="empty">Nothing to compare yet. Pick products above or from the Medicines page.</div>';return;}
+  const best=(m)=>Math.min(m.price,...(m.providers||[]).map(p=>p.price));
+  const cheapest=Math.min(...items.map(best));
+  const row=(l,f)=>`<tr><th>${l}</th>${items.map(m=>`<td>${f(m)}</td>`).join('')}</tr>`;
+  out.innerHTML=`<div style="overflow:auto"><table class="t"><tr><th>Product</th>${items.map(m=>`<td>${m.image?`<img class="compare-thumb" src="${HK.img?HK.img(m.image):m.image}" alt="${HK.esc(m.name)}" onerror="this.style.display='none';"><br>`:''}<b>${HK.esc(m.name)}</b><br><button class="btn sm red" data-rm="${m.id}" style="margin-top:6px">Remove</button></td>`).join('')}</tr>
+  ${row('Category',m=>HK.esc(m.category))}${row('Rating',m=>'★ '+m.rating)}${row('Listed price',m=>HK.rupee(m.price))}
+  ${row('Best price',m=>`<span class="${best(m)===cheapest?'best':''}">${HK.rupee(best(m))}${best(m)===cheapest?' ✓ cheapest':''}</span>`)}
+  ${row('Providers',m=>(m.providers||[]).map(p=>`${HK.esc(p.name)}: ${HK.rupee(p.price)}`).join('<br>')||'-')}
+  ${row('',m=>`<button class="btn sm" data-add="${m.id}">Add to cart</button>`)}</table></div>`;
+  out.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{HK.save('hk_compare',HK.json('hk_compare',[]).filter(x=>x!==b.dataset.rm));render();});
+  out.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>HK.addToCart(all.find(m=>m.id===b.dataset.add)));
+}
+HK.api('/medicines').then(r=>{all=r.medicines || [];pick.insertAdjacentHTML('beforeend',all.map(m=>`<option value="${m.id}">${HK.esc(m.name)}</option>`).join(''));render();}).catch(()=>{all=[];render();});
+pick.onchange=()=>{const c=HK.json('hk_compare',[]);if(pick.value&&!c.includes(pick.value)){if(c.length>=3)HK.toast('Max 3 products');else{c.push(pick.value);HK.save('hk_compare',c);}}pick.value='';render();};
+document.getElementById('clear').onclick=()=>{HK.save('hk_compare',[]);render();};
+</script></body></html>
