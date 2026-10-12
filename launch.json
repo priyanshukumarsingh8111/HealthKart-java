@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "HealthKart Web Server (Port 3000)",
+            "request": "launch",
+            "mainClass": "com.healthkart.HealthKartApplication",
+            "projectName": "healthkart-server",
+            "vmArgs": "-Dserver.port=3000"
+        },
+        {
+            "type": "java",
+            "name": "HealthKart Swing Desktop GUI",
+            "request": "launch",
+            "mainClass": "com.healthkart.gui.HealthKartGUI",
+            "projectName": "healthkart-server"
+        },
+        {
+            "type": "java",
+            "name": "Run Architecture Rubrics Verifier",
+            "request": "launch",
+            "mainClass": "com.healthkart.ArchitectureVerificationRunner",
+            "projectName": "healthkart-server"
+        }
+    ]
+}

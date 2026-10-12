@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "1. Run HealthKart Web Server",
+            "type": "shell",
+            "command": "${workspaceFolder}/run-app.bat",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "2. Run HealthKart Swing Desktop GUI",
+            "type": "shell",
+            "command": "${workspaceFolder}/run-gui.bat",
+            "problemMatcher": []
+        },
+        {
+            "label": "3. Run Architecture & Rubrics Test Suite",
+            "type": "shell",
+            "command": "java -Dloader.main=com.healthkart.ArchitectureVerificationRunner -cp target/healthkart-server-1.0.0.jar org.springframework.boot.loader.launch.PropertiesLauncher",
+            "problemMatcher": []
+        }
+    ]
+}
