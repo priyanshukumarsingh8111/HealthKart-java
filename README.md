@@ -268,7 +268,7 @@ Contributions are most welcome:
 Released under the **MIT License**. See [LICENSE](LICENSE).
 
 ## 👥 Author
-
+"Team PharmaCoders"
 **Priyanshu Kumar Singh** · [@priyanshukumarsingh8111](https://github.com/priyanshukumarsingh8111)
 
 ---
