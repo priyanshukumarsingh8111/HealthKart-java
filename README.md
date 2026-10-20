@@ -18,7 +18,7 @@ Search medicines · Compare prices · Consult doctors · Manage your health — 
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
-**Maintained by [Priyanshu Kumar Singh](https://github.com/priyanshukumarsingh8111)**
+**Maintained by [Priyanshu Kumar ](https://github.com/priyanshukumarsingh8111)**
 
 </div>
 
