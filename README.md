@@ -2,7 +2,7 @@
 HealthKart is a smart healthcare platform for medicines, product comparison, doctor consultations, appointments, prescriptions, health records, reminders, and orders—all in one place.
 <div align="center">
 
-# 💚 HealthKart (Java)
+# 💚 HealthKart (Java Project)
 
 ### Healthcare Made Simple & Affordable
 
